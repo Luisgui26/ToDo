@@ -1,0 +1,270 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+    --bg-color: #f1f5f9; /* Fundo cinza-azulado moderno */
+    --container-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    
+    /* Tons Modernos (Pastéis/Sóbrios) */
+    --primary: #6366f1; /* Indigo suave */
+    --primary-hover: #4f46e5;
+    --success: #10b981; /* Esmeralda */
+    --success-hover: #059669;
+    --danger: #f43f5e; /* Rose / Vermelho moderno */
+    --danger-hover: #e11d48;
+    --edit: #3b82f6; /* Azul moderno */
+    --edit-hover: #2563eb;
+    
+    --card-bg: #ffffff;
+    --completed-bg: #f8fafc;
+    
+    /* Sombras mais definidas e modernas (estilo Tailwind) */
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    
+    /* Bordas um pouco mais retas e menos "bolha" */
+    --radius: 12px;
+    --radius-sm: 6px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.app-container {
+    background-color: var(--container-bg);
+    width: 100%;
+    max-width: 600px;
+    padding: 30px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+h1 {
+    font-size: 24px;
+    color: var(--text-main);
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.task-stats {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.stat-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.stat-badge.pending {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.stat-badge.completed {
+    background-color: #d1fae5;
+    color: #059669;
+}
+
+.input-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+#task-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid #eeeeee;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+    outline: none;
+}
+
+#task-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); /* Focus ring para acessibilidade */
+}
+
+/* Validação de Formulário */
+#task-input.invalid {
+    border-color: var(--danger);
+}
+
+.error-message {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: -20px;
+    margin-bottom: 20px;
+    display: none;
+    animation: slideIn 0.2s ease;
+}
+
+#add-btn {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#add-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+#add-btn:active {
+    transform: scale(0.97);
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 40px 0;
+    display: none; /* Controlado via JS */
+}
+
+.empty-state i {
+    font-size: 40px;
+    margin-bottom: 10px;
+    color: #e0e0e0;
+}
+
+.task-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.task-item {
+    background-color: var(--card-bg);
+    border-radius: var(--radius-sm);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+    animation: slideIn 0.3s ease forwards;
+}
+
+.task-item:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.task-item.completed {
+    background-color: var(--completed-bg);
+    opacity: 0.8;
+}
+
+.task-item.completed .task-text {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.task-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-right: 15px;
+    word-break: break-word;
+}
+
+.task-text {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    transition: color 0.3s ease;
+}
+
+.task-date {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.task-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px; /* Menos redondo, aspecto mais moderno e tech */
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.btn-complete { background-color: var(--success); }
+.btn-complete:hover { background-color: var(--success-hover); transform: scale(1.1); }
+
+.btn-edit { background-color: var(--edit); }
+.btn-edit:hover { background-color: var(--edit-hover); transform: scale(1.1); }
+
+.btn-delete { background-color: var(--danger); }
+.btn-icon:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Animação de entrada e saída */
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.task-item.removing {
+    opacity: 0;
+    transform: translateX(30px);
+}
+
+@media (max-width: 480px) {
+    .input-section {
+        flex-direction: column;
+    }
+    #add-btn {
+        padding: 12px;
+        justify-content: center;
+    }
+    .task-actions {
+        flex-direction: column;
+    }
+}
