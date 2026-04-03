@@ -7,12 +7,27 @@ const pendingCountEl = document.getElementById('pending-count');
 const completedCountEl = document.getElementById('completed-count');
 const errorMessageEl = document.getElementById('error-message');
 
+// Elementos do Modal de Edição
+const editModal = document.getElementById('edit-modal');
+const editTaskInput = document.getElementById('edit-task-input');
+const saveEditBtn = document.getElementById('save-edit-btn');
+const cancelEditBtn = document.getElementById('cancel-edit-btn');
+const editErrorMessageEl = document.getElementById('edit-error-message');
+
+// Elementos do Modal de Exclusão
+const deleteModal = document.getElementById('delete-modal');
+const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+
 // ==========================================
 // ESTADO (State Management Pattern)
 // ==========================================
 const state = {
     tasks: [],
-    loading: false
+    loading: false,
+    editingTaskId: null,
+    deletingTaskId: null,
+    previousFocus: null
 };
 
 // ==========================================
@@ -102,41 +117,120 @@ function addTask() {
     renderTasks();
 }
 
-// Editar uma tarefa existente
+// Editar uma tarefa existente (Abre o Modal)
 function editTask(id) {
     const task = state.tasks.find(t => t.id === id);
     if (!task) return;
 
     // Acessibilidade: Salvar foco atual
-    const previousFocus = document.activeElement;
+    state.previousFocus = document.activeElement;
+    state.editingTaskId = id;
 
-    const newText = prompt('Edite sua tarefa:', task.text);
-    if (newText !== null) {
-        const trimmed = newText.trim();
-        if (trimmed !== '' && trimmed.length <= 100) {
-            task.text = trimmed;
-            saveTasks();
-            renderTasks();
-        }
-    }
+    // Preencher e limpar erros anteriores
+    editTaskInput.value = task.text;
+    editErrorMessageEl.style.display = 'none';
+    editTaskInput.classList.remove('invalid');
+
+    // Mostrar modal
+    editModal.classList.add('active');
+    editModal.setAttribute('aria-hidden', 'false');
     
-    // Restaurar foco
-    if (previousFocus) previousFocus.focus();
+    // Pequeno delay para focar o input após o display:flex renderizar
+    setTimeout(() => editTaskInput.focus(), 50);
 }
 
-// Deletar uma tarefa
+// Fechar Modal
+function closeEditModal() {
+    editModal.classList.remove('active');
+    editModal.setAttribute('aria-hidden', 'true');
+    state.editingTaskId = null;
+    
+    // Restaurar foco de onde o usuário veio
+    if (state.previousFocus) {
+        state.previousFocus.focus();
+    }
+}
+
+// Salvar as alterações feitas no Modal
+function saveEditedTask() {
+    if (!state.editingTaskId) return;
+    
+    const newText = editTaskInput.value.trim();
+    
+    // Validação inline do modal
+    if (!newText) {
+        editErrorMessageEl.textContent = 'A tarefa não pode estar vazia.';
+        editErrorMessageEl.style.display = 'block';
+        editTaskInput.classList.add('invalid');
+        return;
+    }
+    if (newText.length > 100) {
+        editErrorMessageEl.textContent = 'A tarefa deve ter menos de 100 caracteres.';
+        editErrorMessageEl.style.display = 'block';
+        editTaskInput.classList.add('invalid');
+        return;
+    }
+
+    const task = state.tasks.find(t => t.id === state.editingTaskId);
+    if (task) {
+        task.text = newText;
+        saveTasks();
+        renderTasks();
+    }
+    
+    closeEditModal();
+}
+
+// Abrir Modal de Exclusão
 function deleteTask(id) {
-    if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
-        const taskElement = document.querySelector(`[data-id="${id}"]`);
-        if (taskElement) {
-            taskElement.classList.add('removing');
-            
-            setTimeout(() => {
-                state.tasks = state.tasks.filter(t => t.id !== id);
-                saveTasks();
-                renderTasks();
-            }, 300);
-        }
+    const task = state.tasks.find(t => t.id === id);
+    if (!task) return;
+
+    state.previousFocus = document.activeElement;
+    state.deletingTaskId = id;
+
+    deleteModal.classList.add('active');
+    deleteModal.setAttribute('aria-hidden', 'false');
+    
+    // Focar no botão Cancelar por segurança contra acidentes
+    setTimeout(() => cancelDeleteBtn.focus(), 50);
+}
+
+// Fechar Modal de Exclusão
+function closeDeleteModal() {
+    deleteModal.classList.remove('active');
+    deleteModal.setAttribute('aria-hidden', 'true');
+    state.deletingTaskId = null;
+
+    if (state.previousFocus) {
+        state.previousFocus.focus();
+    }
+}
+
+// Confirmar e Executar Exclusão
+function confirmDeleteTask() {
+    if (!state.deletingTaskId) return;
+
+    const id = state.deletingTaskId;
+    const taskElement = document.querySelector(`[data-id="${id}"]`);
+    
+    // Esconder modal imediatamente
+    deleteModal.classList.remove('active');
+    deleteModal.setAttribute('aria-hidden', 'true');
+    state.deletingTaskId = null;
+
+    if (taskElement) {
+        taskElement.classList.add('removing');
+        
+        setTimeout(() => {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            saveTasks();
+            renderTasks();
+        }, 300);
+    } else {
+        state.tasks = state.tasks.filter(t => t.id !== id);
+        saveTasks();
+        renderTasks();
     }
 }
 
@@ -231,10 +325,44 @@ taskInput.addEventListener('input', clearError);
 // Clique no botão adicionar
 addBtn.addEventListener('click', addTask);
 
-// Pressionar Enter no campo de texto
+// Pressionar Enter no campo de texto principal
 taskInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         addTask();
+    }
+});
+
+taskInput.addEventListener('input', clearError);
+
+// Eventos dos Modais
+saveEditBtn.addEventListener('click', saveEditedTask);
+cancelEditBtn.addEventListener('click', closeEditModal);
+
+confirmDeleteBtn.addEventListener('click', confirmDeleteTask);
+cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+
+editTaskInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') saveEditedTask();
+});
+
+editTaskInput.addEventListener('input', () => {
+    editErrorMessageEl.style.display = 'none';
+    editTaskInput.classList.remove('invalid');
+});
+
+// Fechar modais clicando fora ou com ESC
+editModal.addEventListener('click', (e) => {
+    if (e.target === editModal) closeEditModal();
+});
+
+deleteModal.addEventListener('click', (e) => {
+    if (e.target === deleteModal) closeDeleteModal();
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (editModal.classList.contains('active')) closeEditModal();
+        if (deleteModal.classList.contains('active')) closeDeleteModal();
     }
 });
 

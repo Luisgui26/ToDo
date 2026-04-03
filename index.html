@@ -38,6 +38,31 @@
         </main>
     </div>
 
+    <!-- Modal de Edição -->
+    <div id="edit-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+        <div class="modal-content">
+            <h2 id="modal-title">Editar Tarefa</h2>
+            <input type="text" id="edit-task-input" autocomplete="off" aria-label="Editar texto da tarefa">
+            <div id="edit-error-message" class="error-message" role="alert" aria-live="polite"></div>
+            <div class="modal-actions">
+                <button id="cancel-edit-btn" class="btn-secondary">Cancelar</button>
+                <button id="save-edit-btn" class="btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Exclusão -->
+    <div id="delete-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="delete-modal-title" aria-modal="true">
+        <div class="modal-content delete-content">
+            <h2 id="delete-modal-title">Excluir Tarefa</h2>
+            <p>Tem certeza que deseja remover esta tarefa da lista? Esta ação não pode ser desfeita.</p>
+            <div class="modal-actions">
+                <button id="cancel-delete-btn" class="btn-secondary">Cancelar</button>
+                <button id="confirm-delete-btn" class="btn-danger">Remover</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
