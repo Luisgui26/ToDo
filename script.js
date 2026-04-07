@@ -96,14 +96,24 @@ function clearError() {
     taskInput.setAttribute('aria-invalid', 'false');
 }
 
+// Helper: Capitalizar primeira letra
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 // Adicionar uma nova tarefa
 function addTask() {
+    if (state.tasks.length >= 10) {
+        showError('Você atingiu o limite máximo de 10 tarefas.');
+        return;
+    }
+
     const text = taskInput.value.trim();
     if (!validateInput(text)) return;
 
     const newTask = {
         id: Date.now().toString(), // ID único baseado no timestamp
-        text: text,
+        text: capitalizeFirstLetter(text),
         createdAt: getFormattedDate(),
         completed: false
     };
@@ -173,7 +183,7 @@ function saveEditedTask() {
 
     const task = state.tasks.find(t => t.id === state.editingTaskId);
     if (task) {
-        task.text = newText;
+        task.text = capitalizeFirstLetter(newText);
         saveTasks();
         renderTasks();
     }
@@ -251,6 +261,17 @@ function updateStats() {
 
     pendingCountEl.textContent = `Pendentes: ${pendingTasks}`;
     completedCountEl.textContent = `Concluídas: ${completedTasks}`;
+
+    // Desativar input se o limite de 10 for alcançado
+    if (state.tasks.length >= 10) {
+        taskInput.disabled = true;
+        addBtn.disabled = true;
+        taskInput.placeholder = "Limite de 10 tarefas alcançado";
+    } else {
+        taskInput.disabled = false;
+        addBtn.disabled = false;
+        taskInput.placeholder = "O que você precisa fazer?";
+    }
 
     if (state.tasks.length === 0) {
         emptyState.style.display = 'block';
